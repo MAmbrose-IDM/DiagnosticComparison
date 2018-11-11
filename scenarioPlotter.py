@@ -26,7 +26,7 @@ def samples_needed_each_test_plotter(x_values, values_for_plot, pop_size, diagno
     :param pop_size: number of individuals in the population
     :param diagnostic_names: list of character strings naming the diagnostic tests plotted
     :param confidence_level: level of certainty that no positive samples means no circulation
-    :param ax: subplot to create this figure in
+    :param ax: axes to use for the current plot
     """
     if ax is None:
         ax = plt.gca()
@@ -40,27 +40,13 @@ def samples_needed_each_test_plotter(x_values, values_for_plot, pop_size, diagno
         ax.fill_between(x_values, values_for_plot[pp][1], values_for_plot[pp][2],
                         alpha=0.25, facecolor=colormap[pp])
 
-
-    # ax.plot(x_values, values_for_plot[0][0], 'k', color='#CC4F1B', label=diagnostic_names[0])
-    # ax.fill_between(x_values, values_for_plot[0][1], values_for_plot[0][2],
-    #                  alpha=0.25, facecolor='#FF9848')
-    #
-    # ax.plot(x_values, values_for_plot[1][0], 'k', color='#1B2ACC', label=diagnostic_names[1])
-    # ax.fill_between(x_values, values_for_plot[1][1], values_for_plot[1][2],
-    #                  alpha=0.25, facecolor='#089FFF')
-    #
-    # ax.plot(x_values, values_for_plot[2][0], 'k', color='#3F7F4C', label=diagnostic_names[2])
-    # ax.fill_between(x_values, values_for_plot[2][1], values_for_plot[2][2],
-    #                  alpha=0.25, facecolor='#7EFF99')
-
     ax.set_ylabel('number of samples needed')
-    ax.set_xlabel('true number of cases in a year')
+    ax.set_xlabel('number of cases per year')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.set_title('Population size = %i; Confidence level = %.2f' % (pop_size, round(confidence_level, 2)), y=1.08)
-    plt.legend(title='Diagnostic method')
+    # ax.set_title('Population size = %i; Confidence level = %.2f' % (pop_size, round(confidence_level, 2)), y=1.08)
+    # plt.legend(title='Diagnostic method')
 
-    plt.show()
 
 
 def diagnostic_probability_plotter(test_detection_probs, diagnostic_names, ax=None):
@@ -68,6 +54,8 @@ def diagnostic_probability_plotter(test_detection_probs, diagnostic_names, ax=No
 
     :param test_detection_probs: for each of the tests, gives the probabilities an individual who was infected X
         days ago will have a positive test result
+    :param diagnostic_names: strings to use to describe each test
+    :param ax: axes to use for the current plot
     """
     if ax is None:
         ax = plt.gca()
@@ -84,9 +72,8 @@ def diagnostic_probability_plotter(test_detection_probs, diagnostic_names, ax=No
     ax.set_xlabel('days since most recent infection')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.legend(title='Diagnostic method')
+    # plt.legend(title='Diagnostic method')
 
-    plt.show()
 
 
 def time_since_infection_plotter(pop_size, num_case_in_year_list, sim_time_since_last_infection, ax=None):
@@ -103,6 +90,7 @@ def time_since_infection_plotter(pop_size, num_case_in_year_list, sim_time_since
         It is a list of lists of lists. The outer-most list is the transmission intensity scenario (each entry
         corresponds to a value from num_case_in_year_list);
         the middle list is the simulation; the inner list is the individuals in the population
+    :param ax: axes to use for the current plot
     """
     if ax is None:
         ax = plt.gca()
@@ -132,13 +120,13 @@ def time_since_infection_plotter(pop_size, num_case_in_year_list, sim_time_since
                     density_days_since_infection[sim_time_since_last_infection[i1][i2][i3]] += 1
         ax.plot([y/num_data_points for y in density_days_since_infection], 'k', label=num_case_in_year_list[i1], color=colors[i1])
 
-    ax.set_title('Population size = %i' % pop_size, y=1.08)
+    # ax.set_title('Population size = %i' % pop_size, y=1.08)
     ax.set_ylabel('proportion of population')
     ax.set_xlabel('days since most recent infection')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.legend(title='Number of cases per year')
-    plt.show()
+    # plt.legend(title='Number of cases per year')
+    return ax.legend
 
 
 def case_seasonality_plotter(pop_size, seasonal_scalar, num_case_in_year_list, surveillance_days, ax=None):
@@ -148,6 +136,8 @@ def case_seasonality_plotter(pop_size, seasonal_scalar, num_case_in_year_list, s
     :param seasonal_scalar: relative intensity of transmission on this day of the year.
     :param num_case_in_year_list: list detailing the average number of malaria cases expected to occur in a year among
     all individuals in the population (list may contain several transmission intensity scenarios to plot)
+    :param surveillance_days: list containing the day of the year surveillance was conducted
+    :param ax: axes to use for the current plot
     """
     if ax is None:
         ax = plt.gca()
@@ -166,14 +156,61 @@ def case_seasonality_plotter(pop_size, seasonal_scalar, num_case_in_year_list, s
                 color=colors[i1])
 
     ax.axvline(x=surveillance_days[0], color='k')
-    ax.set_title('Population size = %i' % pop_size, y=1.08)
+    # ax.set_title('Population size = %i' % pop_size, y=1.08)
     ax.set_ylabel('expected number of cases')
     ax.set_xlabel('days of year')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.legend(title='Number of cases per year')
-    plt.show()
+    # plt.legend(title='Number of cases per year')
 
+
+def num_cases_legend_plotter(num_case_in_year_list, ax):
+    """
+
+    :param num_case_in_year_list: list detailing the average number of malaria cases expected to occur in a year among
+    all individuals in the population (list may contain several transmission intensity scenarios to plot)
+    :param ax: axes to use for the current plot
+    """
+    # get colors
+    start = 0.0
+    stop = 1.0
+    number_of_lines = len(num_case_in_year_list)
+    cm_subsection = np.linspace(start, stop, number_of_lines)
+
+    colors = [cm.jet(x) for x in cm_subsection]
+
+    ax.axis('off')
+    ax.set_xlim([0, 4])
+    ax.set_ylim([-0.5, len(num_case_in_year_list)])
+    ax.text(0.5, len(num_case_in_year_list), 'Number of cases per year', horizontalalignment='left')
+    for i1 in range(len(num_case_in_year_list)):
+        ax.plot([1, 2], [i1, i1], 'k', label=num_case_in_year_list[i1],
+                color=colors[i1])
+        ax.text(2.1, i1, num_case_in_year_list[i1], verticalalignment='center')
+
+
+def diagnostic_legend_plotter(diagnostic_names, ax):
+    """
+
+    :param diagnostic_names: strings to use to describe each test
+    :param ax: axes to use for the current plot
+    """
+
+    colormap0 = cm.tab10.colors
+    color_order = [5, 9, 8, 7, 6, 2, 1, 0, 4, 8, 3]
+    colormap = [colormap0[y] for y in color_order]
+
+    ax.axis('off')
+    ax.set_xlim([0, 4])
+    ax.set_ylim([-0.5, len(diagnostic_names)])
+    ax.text(0.5, len(diagnostic_names), 'Diagnostic test', horizontalalignment='left')
+
+    for pp in range(len(diagnostic_names)):
+        ax.plot([1, 2], [pp, pp], 'k', color=colormap[pp], linewidth=4.0, alpha=0.75)
+        ax.text(2.1, pp, diagnostic_names[pp], verticalalignment='center')
+
+
+# Older plotting functions:
 
 def samples_needed_fraction_positive_plotter():
     """

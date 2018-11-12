@@ -1,19 +1,12 @@
 import numpy as np
-# import csv
 import matplotlib.pyplot as plt
 import pickle
 
-from simulateExposureAndTestResults import simulate_over_transmission_intensities, time_since_infection
-from calculateNumSamplesNeeded import calculate_num_samples_each_sim
 from scenarioPlotter import samples_needed_each_test_plotter, diagnostic_probability_plotter, \
     time_since_infection_plotter, case_seasonality_plotter, num_cases_legend_plotter, diagnostic_legend_plotter
 
 
 # initialize parameters that describe the system
-pop_size = 1000
-# num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size/9))) + [round(pop_size * 1.25)]
-num_case_in_year_list = [round(pop_size * y) for y in [0.03, 0.06, 0.09, 0.22, 0.35, 0.48, 0.61, 0.74, 0.87, 1, 1.25]]
-
 initialize_years = 2
 test_detection_probs = [([0.0]*1 + [0.01*np.exp(np.log(70)/3)**y for y in range(4)] + [0.7]*10
                          + [0.7*np.exp(np.log(0.00007)/30)**y for y in range(31)] + [0]*250),
@@ -34,46 +27,27 @@ seasonal_scalar_list = [[1] * 365, [(1 + 0.5 * np.sin(2 * np.pi / 365 * y - 166)
 surveillance_days_list = [[250], [250], [90]]
 
 
-# store results for each seasonality/sampling scenario
-sim_output_list = []
-sim_num_samples_needed_list = []
+# Create plot based on loaded output from previous run (if this parameter set has not already been saved, run it
+#   from run_diagnosticTestComparisons_plotPanel.py
 
-# iterate through three seasonality/sampling scenarios
-for scenario in range(len(surveillance_days_list)):
-    print('Current scenario: %i' % scenario)
-    seasonal_scalar = seasonal_scalar_list[scenario]
-    surveillance_days = surveillance_days_list[scenario]
+pop_size = 500
+num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size/9))) + [round(pop_size * 1.25)]
+sim_output_list = pickle.load(open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
+sim_num_samples_needed_list = pickle.load(open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 
-    # Generate datasets specifying how long individuals had been infected when sampling occurred (index 0) and whether
-    #   they tested positive for each of the tests (index 1)
-    sim_output = simulate_over_transmission_intensities(pop_size=pop_size,
-                                                        num_case_in_year_list=num_case_in_year_list,
-                                                        initialize_years=initialize_years,
-                                                        seasonal_scalar=seasonal_scalar,
-                                                        surveillance_days=surveillance_days,
-                                                        test_detection_probs=test_detection_probs,
-                                                        false_pos_prob=false_pos_prob,
-                                                        num_sims_each=num_sims_each)
-    sim_output_list.append(sim_output[:])
+pop_size = 1000
+num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)]
+sim_output_list_1000 = pickle.load(
+    open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
+sim_num_samples_needed_list_1000 = pickle.load(
+    open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 
-    # Calculate the number of samples needed for each of the fraction-of-tests-positive scenarios
-    sim_num_samples_needed = calculate_num_samples_each_sim(sim_number_positive=sim_output[1],
-                                                            pop_size=pop_size,
-                                                            confidence_level=confidence_level)
-    sim_num_samples_needed_list.append(sim_num_samples_needed[:])
-    # In sim_num_samples_needed,
-    #    The outer-most level has one entry for each of the diagnostic tests
-    #    The middle level has one entry for each scenario on the number of cases in a year (from num_case_in_year_list)
-    #    The inner-most level has one entry for each simulation run.
-
-
-# dump output as pickle file so this part down't need to be redone if I just want different plots
-pickle.dump(sim_output_list, open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "wb"))
-pickle.dump(sim_num_samples_needed_list, open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "wb"))
-
-# sim_output_list = pickle.load(open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
-# sim_num_samples_needed_list = pickle.load(open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
-
+pop_size = 500
+num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)]
+sim_output_list_500 = pickle.load(
+    open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
+sim_num_samples_needed_list_500 = pickle.load(
+    open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 
 # Create multi-panel plot
 # - Each columns of the new plot panel should correspond to a different assumption about seasonality of cases.
@@ -93,8 +67,6 @@ for scenario in range(len(surveillance_days_list)):
     # values for this seasonality / surveillance scenario
     seasonal_scalar = seasonal_scalar_list[scenario]
     surveillance_days = surveillance_days_list[scenario]
-    sim_output = sim_output_list[scenario]
-    sim_num_samples_needed = sim_num_samples_needed_list[scenario]
 
     # Plotting
 
@@ -105,16 +77,36 @@ for scenario in range(len(surveillance_days_list)):
                              num_case_in_year_list=num_case_in_year_list, surveillance_days=surveillance_days,
                              ax=ax_seasonality)
 
-    # second plotted row: time since last infection
-    ax_time_since_infection = fig.add_subplot(grid[2:4, scenario])
-    # plot simulation results - time since infection for all individuals in all simulations
-    transmission_intensity_legend = time_since_infection_plotter(pop_size=pop_size,
-                                                                 num_case_in_year_list=num_case_in_year_list,
-                                                                 sim_time_since_last_infection=sim_output[0],
-                                                                 ax=ax_time_since_infection)
+    # second plotted row: 500 individuals
+    pop_size = 500
+    sim_output = sim_output_list_500[scenario]
+    sim_num_samples_needed = sim_num_samples_needed_list_500[scenario]
+    num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)]
+    ax_samples_needed_500 = fig.add_subplot(grid[2:4, scenario])
+    # Get the mean values as well as the 95CI for plotting lines and shaded CI regions
+    # save results in lines_for_plot
+    values_for_plot = [[[None]*len(num_case_in_year_list) for n in range(3)]
+                       for m in range(len(test_detection_probs))]
+    for i1 in range(len(sim_num_samples_needed)):
+        for i2 in range(len(sim_num_samples_needed[i1])):
+            # mean value
+            values_for_plot[i1][0][i2] = np.percentile(sim_num_samples_needed[i1][i2], 50)
+            # upper 95% CI
+            values_for_plot[i1][1][i2] = min(pop_size, np.percentile(sim_num_samples_needed[i1][i2], 97.5))
+            # lower 95% CI
+            values_for_plot[i1][2][i2] = np.percentile(sim_num_samples_needed[i1][i2], 2.5)
 
-    # third plotted row: number of samples needed
-    ax_samples_needed = fig.add_subplot(grid[4:6, scenario])
+    # Call the plotting function to create the mean lines and 95CI areas for each of the diagnostic tests
+    samples_needed_each_test_plotter(x_values=num_case_in_year_list, values_for_plot=values_for_plot, pop_size=pop_size,
+                                     diagnostic_names=diagnostic_names, confidence_level=confidence_level,
+                                     num_case_in_year_list=num_case_in_year_list, ax=ax_samples_needed_500)
+
+    # third plotted row: 1000 individuals
+    pop_size = 1000
+    sim_output = sim_output_list_1000[scenario]
+    sim_num_samples_needed = sim_num_samples_needed_list_1000[scenario]
+    num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)]
+    ax_samples_needed_1000 = fig.add_subplot(grid[4:6, scenario])
 
     # Get the mean values as well as the 95CI for plotting lines and shaded CI regions
     # save results in lines_for_plot
@@ -132,12 +124,14 @@ for scenario in range(len(surveillance_days_list)):
     # Call the plotting function to create the mean lines and 95CI areas for each of the diagnostic tests
     samples_needed_each_test_plotter(x_values=num_case_in_year_list, values_for_plot=values_for_plot, pop_size=pop_size,
                                      diagnostic_names=diagnostic_names, confidence_level=confidence_level,
-                                     num_case_in_year_list=num_case_in_year_list, ax=ax_samples_needed)
+                                     num_case_in_year_list=num_case_in_year_list, ax=ax_samples_needed_1000)
 
 
 # Add legends for different transmission intensities and diagnostic tests.
-ax_legend_intensity = fig.add_subplot(grid[0:3, -1])
-num_cases_legend_plotter(num_case_in_year_list, ax_legend_intensity)
+# ax_legend_intensity = fig.add_subplot(grid[0:3, -1])
+# num_cases_legend_plotter([15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)],
+#  ax_legend_intensity)
+# num_cases_legend_plotter(num_case_in_year_list, ax_legend_intensity)
 
 ax_legend_test = fig.add_subplot(grid[3, -1])
 diagnostic_legend_plotter(diagnostic_names, ax_legend_test)
@@ -147,8 +141,8 @@ diagnostic_legend_plotter(diagnostic_names, ax_legend_test)
 ax_diagnostic_test = fig.add_subplot(grid[4:6, -1])
 diagnostic_probability_plotter(test_detection_probs=test_detection_probs, diagnostic_names=diagnostic_names)
 
-fig.suptitle('Population size = %i; Confidence level = %.2f' % (pop_size, round(confidence_level, 2)))
+fig.suptitle('Population size = 500 vs 1000; Confidence level = %.2f' % round(confidence_level, 2))
 
 plt.show()
 
-fig.savefig('NumSamplesNeeded_pop%i_CI%i.pdf' % (pop_size, round(confidence_level * 100)))
+fig.savefig('NumSamplesNeeded_pop500vs1000_CI%i.pdf' % round(confidence_level * 100))

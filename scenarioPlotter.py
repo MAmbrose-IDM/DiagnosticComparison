@@ -56,6 +56,7 @@ def samples_needed_each_test_plotter(x_values, values_for_plot, pop_size, diagno
     colors = [cm.jet(x) for x in cm_subsection]
     ax.scatter(num_case_in_year_list, [0]*len(num_case_in_year_list), c=colors, s=50, marker="|")
 
+    # ax.set_ylim([0, 800])
     ax.set_ylabel('number of samples needed')
     ax.set_xlabel('number of cases per year')
     ax.spines['top'].set_visible(False)

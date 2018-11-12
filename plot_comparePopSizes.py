@@ -31,19 +31,18 @@ surveillance_days_list = [[250], [250], [90]]
 #   from run_diagnosticTestComparisons_plotPanel.py
 
 pop_size = 500
-num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size/9))) + [round(pop_size * 1.25)]
 sim_output_list = pickle.load(open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 sim_num_samples_needed_list = pickle.load(open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 
 pop_size = 1000
-num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)]
+num_case_in_year_list = [round(pop_size * y) for y in [0.03, 0.06, 0.09, 0.22, 0.35, 0.48, 0.61, 0.74, 0.87, 1, 1.25]]
 sim_output_list_1000 = pickle.load(
     open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 sim_num_samples_needed_list_1000 = pickle.load(
     open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 
 pop_size = 500
-num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)]
+num_case_in_year_list = [round(pop_size * y) for y in [0.03, 0.06, 0.09, 0.22, 0.35, 0.48, 0.61, 0.74, 0.87, 1, 1.25]]
 sim_output_list_500 = pickle.load(
     open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 sim_num_samples_needed_list_500 = pickle.load(
@@ -81,7 +80,8 @@ for scenario in range(len(surveillance_days_list)):
     pop_size = 500
     sim_output = sim_output_list_500[scenario]
     sim_num_samples_needed = sim_num_samples_needed_list_500[scenario]
-    num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)]
+    num_case_in_year_list = [round(pop_size * y) for y in
+                             [0.03, 0.06, 0.09, 0.22, 0.35, 0.48, 0.61, 0.74, 0.87, 1, 1.25]]
     ax_samples_needed_500 = fig.add_subplot(grid[2:4, scenario])
     # Get the mean values as well as the 95CI for plotting lines and shaded CI regions
     # save results in lines_for_plot
@@ -105,7 +105,8 @@ for scenario in range(len(surveillance_days_list)):
     pop_size = 1000
     sim_output = sim_output_list_1000[scenario]
     sim_num_samples_needed = sim_num_samples_needed_list_1000[scenario]
-    num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)]
+    num_case_in_year_list = [round(pop_size * y) for y in
+                             [0.03, 0.06, 0.09, 0.22, 0.35, 0.48, 0.61, 0.74, 0.87, 1, 1.25]]
     ax_samples_needed_1000 = fig.add_subplot(grid[4:6, scenario])
 
     # Get the mean values as well as the 95CI for plotting lines and shaded CI regions
@@ -128,10 +129,9 @@ for scenario in range(len(surveillance_days_list)):
 
 
 # Add legends for different transmission intensities and diagnostic tests.
-# ax_legend_intensity = fig.add_subplot(grid[0:3, -1])
-# num_cases_legend_plotter([15, 30] + list(range(45, round(pop_size), round(pop_size / 9))) + [round(pop_size * 1.25)],
-#  ax_legend_intensity)
-# num_cases_legend_plotter(num_case_in_year_list, ax_legend_intensity)
+ax_legend_intensity = fig.add_subplot(grid[0:3, -1])
+num_cases_legend_plotter(num_case_in_year_list=[0.03, 0.06, 0.09, 0.22, 0.35, 0.48, 0.61, 0.74, 0.87, 1, 1.25],
+                         ax=ax_legend_intensity)
 
 ax_legend_test = fig.add_subplot(grid[3, -1])
 diagnostic_legend_plotter(diagnostic_names, ax_legend_test)

@@ -201,6 +201,8 @@ def num_cases_legend_plotter(num_case_in_year_list, ax):
     ax.set_xlim([0, 4])
     ax.set_ylim([-0.5, len(num_case_in_year_list)])
     ax.text(0.5, len(num_case_in_year_list), 'Number of cases per year', horizontalalignment='left')
+    # ax.text(0.5, len(num_case_in_year_list), 'Number of cases per year per capita', horizontalalignment='left')
+
     for i1 in range(len(num_case_in_year_list)):
         ax.plot([1, 2], [i1, i1], 'k', label=num_case_in_year_list[i1],
                 color=colors[i1])

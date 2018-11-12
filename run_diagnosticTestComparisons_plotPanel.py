@@ -10,7 +10,7 @@ from scenarioPlotter import samples_needed_each_test_plotter, diagnostic_probabi
 
 
 # initialize parameters that describe the system
-pop_size = 1000
+pop_size = 500
 # num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size/9))) + [round(pop_size * 1.25)]
 num_case_in_year_list = [round(pop_size * y) for y in [0.03, 0.06, 0.09, 0.22, 0.35, 0.48, 0.61, 0.74, 0.87, 1, 1.25]]
 

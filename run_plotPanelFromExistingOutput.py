@@ -8,7 +8,7 @@ from scenarioPlotter import samples_needed_each_test_plotter, diagnostic_probabi
 
 # initialize parameters that describe the system
 pop_size = 1000
-num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size/9))) + [round(pop_size * 1.25)]
+num_case_in_year_list = [round(pop_size * y) for y in [0.03, 0.06, 0.09, 0.22, 0.35, 0.48, 0.61, 0.74, 0.87, 1, 1.25]]
 initialize_years = 2
 test_detection_probs = [([0.0]*1 + [0.01*np.exp(np.log(70)/3)**y for y in range(4)] + [0.7]*10
                          + [0.7*np.exp(np.log(0.00007)/30)**y for y in range(31)] + [0]*250),

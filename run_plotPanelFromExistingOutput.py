@@ -1,10 +1,7 @@
 import numpy as np
-# import csv
 import matplotlib.pyplot as plt
 import pickle
 
-from simulateExposureAndTestResults import simulate_over_transmission_intensities, time_since_infection
-from calculateNumSamplesNeeded import calculate_num_samples_each_sim
 from scenarioPlotter import samples_needed_each_test_plotter, diagnostic_probability_plotter, \
     time_since_infection_plotter, case_seasonality_plotter, num_cases_legend_plotter, diagnostic_legend_plotter
 
@@ -32,45 +29,11 @@ seasonal_scalar_list = [[1] * 365, [(1 + 0.5 * np.sin(2 * np.pi / 365 * y - 166)
 surveillance_days_list = [[250], [250], [90]]
 
 
-# store results for each seasonality/sampling scenario
-sim_output_list = []
-sim_num_samples_needed_list = []
+# Create plot based on loaded output from previous run (if this parameter set has not already been saved, run it
+#   from run_diagnosticTestComparisons_plotPanel.py
 
-# iterate through three seasonality/sampling scenarios
-for scenario in range(len(surveillance_days_list)):
-    print('Current scenario: %i' % scenario)
-    seasonal_scalar = seasonal_scalar_list[scenario]
-    surveillance_days = surveillance_days_list[scenario]
-
-    # Generate datasets specifying how long individuals had been infected when sampling occurred (index 0) and whether
-    #   they tested positive for each of the tests (index 1)
-    sim_output = simulate_over_transmission_intensities(pop_size=pop_size,
-                                                        num_case_in_year_list=num_case_in_year_list,
-                                                        initialize_years=initialize_years,
-                                                        seasonal_scalar=seasonal_scalar,
-                                                        surveillance_days=surveillance_days,
-                                                        test_detection_probs=test_detection_probs,
-                                                        false_pos_prob=false_pos_prob,
-                                                        num_sims_each=num_sims_each)
-    sim_output_list.append(sim_output[:])
-
-    # Calculate the number of samples needed for each of the fraction-of-tests-positive scenarios
-    sim_num_samples_needed = calculate_num_samples_each_sim(sim_number_positive=sim_output[1],
-                                                            pop_size=pop_size,
-                                                            confidence_level=confidence_level)
-    sim_num_samples_needed_list.append(sim_num_samples_needed[:])
-    # In sim_num_samples_needed,
-    #    The outer-most level has one entry for each of the diagnostic tests
-    #    The middle level has one entry for each scenario on the number of cases in a year (from num_case_in_year_list)
-    #    The inner-most level has one entry for each simulation run.
-
-
-# dump output as pickle file so this part down't need to be redone if I just want different plots
-pickle.dump(sim_output_list, open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "wb"))
-pickle.dump(sim_num_samples_needed_list, open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "wb"))
-
-# sim_output_list = pickle.load(open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
-# sim_num_samples_needed_list = pickle.load(open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
+sim_output_list = pickle.load(open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
+sim_num_samples_needed_list = pickle.load(open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 
 
 # Create multi-panel plot

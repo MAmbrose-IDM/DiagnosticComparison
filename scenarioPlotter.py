@@ -15,7 +15,8 @@ from matplotlib import cm
 from calculateNumSamplesNeeded import prob_detected_without_replacement
 
 
-def samples_needed_each_test_plotter(x_values, values_for_plot, pop_size, diagnostic_names, confidence_level, ax=None):
+def samples_needed_each_test_plotter(x_values, values_for_plot, pop_size, diagnostic_names, confidence_level,
+                                     num_case_in_year_list, ax=None):
     """
     Currently only plots the first three diagnostic tests sent (will need to add more colors if want additional
         ones plotted in the future)
@@ -26,6 +27,10 @@ def samples_needed_each_test_plotter(x_values, values_for_plot, pop_size, diagno
     :param pop_size: number of individuals in the population
     :param diagnostic_names: list of character strings naming the diagnostic tests plotted
     :param confidence_level: level of certainty that no positive samples means no circulation
+    :param num_case_in_year_list: list containing values used for simulations under different transmission
+        intensities. Gives the average number of malaria cases expected to occur in a year among all individuals in the
+        population (assumed to be evenly distributed through time and assume individuals are selected to be infected at
+        random)
     :param ax: axes to use for the current plot
     """
     if ax is None:
@@ -39,6 +44,17 @@ def samples_needed_each_test_plotter(x_values, values_for_plot, pop_size, diagno
         ax.plot(x_values, values_for_plot[pp][0], 'k', color=colormap[pp], linewidth=3.0,  label=diagnostic_names[pp])
         ax.fill_between(x_values, values_for_plot[pp][1], values_for_plot[pp][2],
                         alpha=0.25, facecolor=colormap[pp])
+
+    # ax = plt.subplot(111)
+    # plot the color for each circulation intensity along the x-axis
+    # get colors
+    start = 0.0
+    stop = 1.0
+    number_of_lines = len(num_case_in_year_list)
+    cm_subsection = np.linspace(start, stop, number_of_lines)
+
+    colors = [cm.jet(x) for x in cm_subsection]
+    ax.scatter(num_case_in_year_list, [0]*len(num_case_in_year_list), c=colors, s=50, marker="|")
 
     ax.set_ylabel('number of samples needed')
     ax.set_xlabel('number of cases per year')

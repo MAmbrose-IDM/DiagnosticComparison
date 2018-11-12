@@ -10,7 +10,7 @@ from scenarioPlotter import samples_needed_each_test_plotter, diagnostic_probabi
 
 
 # initialize parameters that describe the system
-pop_size = 1000
+pop_size = 500
 num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size/9))) + [round(pop_size * 1.25)]
 initialize_years = 2
 test_detection_probs = [([0.0]*1 + [0.01*np.exp(np.log(70)/3)**y for y in range(4)] + [0.7]*10
@@ -24,7 +24,7 @@ test_detection_probs = [([0.0]*1 + [0.01*np.exp(np.log(70)/3)**y for y in range(
 diagnostic_names = ['RDT (pretend)', 'uRDT (pretend)', 'serology (pretend)']
 false_pos_prob = [0.0]*len(test_detection_probs)
 num_sims_each = 200
-confidence_level = 0.95
+confidence_level = 0.75
 
 # Lists of the three seasonality/sampling scenarios to explore
 seasonal_scalar_list = [[1] * 365, [(1 + 0.5 * np.sin(2 * np.pi / 365 * y - 166)) for y in range(1, 366)],
@@ -64,12 +64,13 @@ for scenario in range(len(surveillance_days_list)):
     #    The middle level has one entry for each scenario on the number of cases in a year (from num_case_in_year_list)
     #    The inner-most level has one entry for each simulation run.
 
-# dump output as pickle file so this part down't need to be redone if I just want different plots
-# pickle.dump(sim_output_list, open("sim_output_list_95.p", "wb"))
-# pickle.dump(sim_num_samples_needed_list, open("sim_num_samples_needed_list_95.p", "wb"))
 
-# sim_output_list = pickle.load(open("sim_output_list_95.p", "rb"))
-# sim_num_samples_needed_list = pickle.load(open("sim_num_samples_needed_list_95.p", "rb"))
+# dump output as pickle file so this part down't need to be redone if I just want different plots
+pickle.dump(sim_output_list, open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "wb"))
+pickle.dump(sim_num_samples_needed_list, open("sim_num_samples_needed_list__pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "wb"))
+
+# sim_output_list = pickle.load(open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
+# sim_num_samples_needed_list = pickle.load(open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 
 
 # Create multi-panel plot
@@ -148,3 +149,4 @@ fig.suptitle('Population size = %i; Confidence level = %.2f' % (pop_size, round(
 
 plt.show()
 
+fig.savefig('NumSamplesNeeded_pop%i_CI%i.pdf' % (pop_size, round(confidence_level * 100)))

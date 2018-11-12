@@ -59,6 +59,7 @@ def diagnostic_probability_plotter(test_detection_probs, diagnostic_names, ax=No
     """
     if ax is None:
         ax = plt.gca()
+    # ax=plt.subplot(111)
 
     colormap0 = cm.tab10.colors
     color_order = [5, 9, 8, 7, 6, 2, 1, 0, 4, 8, 3]
@@ -158,7 +159,7 @@ def case_seasonality_plotter(pop_size, seasonal_scalar, num_case_in_year_list, s
     ax.axvline(x=surveillance_days[0], color='k')
     # ax.set_title('Population size = %i' % pop_size, y=1.08)
     ax.set_ylabel('expected number of cases')
-    ax.set_xlabel('days of year')
+    ax.set_xlabel('day of year')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     # plt.legend(title='Number of cases per year')

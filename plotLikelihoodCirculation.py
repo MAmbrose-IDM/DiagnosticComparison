@@ -1,19 +1,14 @@
 import numpy as np
-# import csv
 import matplotlib.pyplot as plt
 import pickle
 
-from simulateExposureAndTestResults import simulate_over_transmission_intensities, time_since_infection
-from calculateNumSamplesNeeded import calculate_num_samples_each_sim
 from scenarioPlotter import samples_needed_each_test_plotter, diagnostic_probability_plotter, \
     time_since_infection_plotter, case_seasonality_plotter, num_cases_legend_plotter, diagnostic_legend_plotter
-
+from likelihoodCirculation import calculate_likelihood_no_circulation_each_sim
 
 # initialize parameters that describe the system
 pop_size = 500
-# num_case_in_year_list = [15, 30] + list(range(45, round(pop_size), round(pop_size/9))) + [round(pop_size * 1.25)]
 num_case_in_year_list = [round(pop_size * y) for y in [0.03, 0.06, 0.09, 0.22, 0.35, 0.48, 0.61, 0.74, 0.87, 1, 1.25]]
-
 initialize_years = 2
 test_detection_probs = [([0.0]*1 + [0.01*np.exp(np.log(70)/3)**y for y in range(4)] + [0.7]*10
                          + [0.7*np.exp(np.log(0.00007)/30)**y for y in range(31)] + [0]*250),
@@ -25,7 +20,7 @@ test_detection_probs = [([0.0]*1 + [0.01*np.exp(np.log(70)/3)**y for y in range(
 
 diagnostic_names = ['RDT (pretend)', 'uRDT (pretend)', 'serology (pretend)']
 # TODO: replace with true values; redo full analysis
-false_pos_prob = [0.0]*len(test_detection_probs)
+false_pos_prob = [0.001, 0.002, 0.001]
 num_sims_each = 200
 confidence_level = 0.95
 
@@ -34,51 +29,31 @@ seasonal_scalar_list = [[1] * 365, [(1 + 0.5 * np.sin(2 * np.pi / 365 * y - 166)
                         [(1 + 0.5 * np.sin(2 * np.pi / 365 * y - 166)) for y in range(1, 366)]]
 surveillance_days_list = [[250], [250], [90]]
 
+# number of samples collected (list)
+number_tested = 100
+number_tested_list = [25, 50, 100, 200, 400]
 
-# store results for each seasonality/sampling scenario
-sim_output_list = []
-sim_num_samples_needed_list = []
-
-# iterate through three seasonality/sampling scenarios
-for scenario in range(len(surveillance_days_list)):
-    print('Current scenario: %i' % scenario)
-    seasonal_scalar = seasonal_scalar_list[scenario]
-    surveillance_days = surveillance_days_list[scenario]
-
-    # Generate datasets specifying how long individuals had been infected when sampling occurred (index 0) and whether
-    #   they tested positive for each of the tests (index 1)
-    sim_output = simulate_over_transmission_intensities(pop_size=pop_size,
-                                                        num_case_in_year_list=num_case_in_year_list,
-                                                        initialize_years=initialize_years,
-                                                        seasonal_scalar=seasonal_scalar,
-                                                        surveillance_days=surveillance_days,
-                                                        test_detection_probs=test_detection_probs,
-                                                        false_pos_prob=false_pos_prob,
-                                                        num_sims_each=num_sims_each)
-    sim_output_list.append(sim_output[:])
-
-    # Calculate the number of samples needed for each of the fraction-of-tests-positive scenarios
-    sim_num_samples_needed = calculate_num_samples_each_sim(sim_number_positive=sim_output[1],
-                                                            pop_size=pop_size,
-                                                            confidence_level=confidence_level)
-    sim_num_samples_needed_list.append(sim_num_samples_needed[:])
-    # In sim_num_samples_needed,
-    #    The outer-most level has one entry for each of the diagnostic tests
-    #    The middle level has one entry for each scenario on the number of cases in a year (from num_case_in_year_list)
-    #    The inner-most level has one entry for each simulation run.
+# probability of circulation
+prob_circulation = 0.2
+prob_circulation_list = [0.01, 0.1, 0.2, 0.4, 0.6]
 
 
-# dump output as pickle file so this part down't need to be redone if I just want different plots
-pickle.dump(sim_output_list, open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "wb"))
-pickle.dump(sim_num_samples_needed_list, open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "wb"))
+# Load output from previous run (if this parameter set has not already been saved, run it
+#   from run_diagnosticTestComparisons_plotPanel.py
 
-# sim_output_list = pickle.load(open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
-# sim_num_samples_needed_list = pickle.load(open("sim_num_samples_needed_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
+sim_output_list = pickle.load(open("sim_output_list_pop%i_CI%i.p" % (pop_size, round(confidence_level * 100)), "rb"))
 
+# calculate the number of samples positive
+# Calculate likelihood of circulation if all samples negative
+calculate_likelihood_no_circulation_each_sim(sim_output_list=sim_output_list, pop_size=pop_size,
+                                          number_tested=number_tested, false_pos_prob=false_pos_prob,
+                                          prob_circulation=prob_circulation)
 
+# TODO: haven't started converting the next section into likelihood of circulation figure panel - actually, I don't think I want to plot num_samples_needed
 # Create multi-panel plot
-# - Each columns of the new plot panel should correspond to a different assumption about seasonality of cases.
-#   The first row shows the expected number of cases through the year. The second row show the proportion of the
+# - Each columns of the new plot panel should correspond to a different assumption about seasonality of cases given
+# # circulation is occurring.
+#   The first row shows the expected number of cases through the year. The second row shows the proportion of the
 #   population that has had their most recent infection within a certain number of days. The final row shows the
 #   number of samples needed to achieve a particular certainty that disease would be detected if circulation were
 #   occurring.
@@ -152,4 +127,4 @@ fig.suptitle('Population size = %i; Confidence level = %.2f' % (pop_size, round(
 
 plt.show()
 
-fig.savefig('NumSamplesNeeded_pop%i_CI%i.pdf' % (pop_size, round(confidence_level * 100)))
+fig.savefig('LikelihoodCirculation_pop%i_CI%i.pdf' % (pop_size, round(confidence_level * 100)))

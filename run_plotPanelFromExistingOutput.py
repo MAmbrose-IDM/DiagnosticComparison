@@ -19,6 +19,7 @@ test_detection_probs = [([0.0]*1 + [0.01*np.exp(np.log(70)/3)**y for y in range(
 
 
 diagnostic_names = ['RDT (pretend)', 'uRDT (pretend)', 'serology (pretend)']
+# TODO: replace with true values; redo full analysis
 false_pos_prob = [0.0]*len(test_detection_probs)
 num_sims_each = 200
 confidence_level = 0.95

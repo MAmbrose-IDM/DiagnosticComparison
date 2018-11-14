@@ -127,6 +127,9 @@ for s1 in range(len(all_sampling_dates)):
             #    Indexing will be as follows: [prob_circulation_index][test_index][s_n]
             like_circulation_given_s_n = [[([0] * (ss + 1)) for y in range(len(test_names))] for z in range(len(p_circulation))]
             like_no_circulation_given_s_n = [[([0] * (ss + 1)) for y in range(len(test_names))] for z in range(len(p_circulation))]
+            # store sum (as we iterate over values of n_p) for each component
+            circulation_sum_component = [[([0] * (ss + 1)) for y in range(len(test_names))] for z in range(len(p_circulation))]
+            no_circulation_sum_component = [[([0] * (ss + 1)) for y in range(len(test_names))] for z in range(len(p_circulation))]
 
             # iterate over possible values of s_n (must be less than or equal to ss
             for s_n in range(ss+1):
@@ -135,7 +138,7 @@ for s1 in range(len(all_sampling_dates)):
                 #                                                        + P(S_n==s_n | circulation) * P(circulation))
 
                 # Let p1 = P(S_n == s_n | N_p=n_p )
-                # Let p2 = P(N_p == n_p | circulation)
+                # Let p2_circulation = P(N_p == n_p | circulation)
                 # Let p2_no_circulation = P(N_p == n_p | no circulation)
                 # Then, for a given set of values for ss, s_n, prob_circulation,
                 # L(no circulation | S_n==s_n) = sum({n_p=0->pop_size} of (p1 * p2_no_circulation * prob_no_circulation))
@@ -179,12 +182,22 @@ for s1 in range(len(all_sampling_dates)):
 
                     for p_c in range(len(p_circulation)):
                         for test in range(len(test_names)):
-                            p2 = freq_pos_counts_circulation[test][n_p]
+                            p2_circulation = freq_pos_counts_circulation[test][n_p]
                             p2_no_circulation = freq_pos_counts_no_circulation[test][n_p]
                             prob_circulation = p_circulation[p_c]
-                            like_circulation_given_s_n[p_c][test][s_n] += p1 * p2 * prob_circulation
-                            like_no_circulation_given_s_n[p_c][test][s_n] += p1 * p2_no_circulation * (1 - prob_circulation)
+                            circulation_sum_component[p_c][test][s_n] += (p1 * p2_circulation * prob_circulation)
+                            no_circulation_sum_component[p_c][test][s_n] += (p1 * p2_no_circulation * (1-prob_circulation))
 
+            # after accumulating all the sums, calculate the final likelihood for each value of s_n, test, prob_circulation
+            for p_c in range(len(p_circulation)):
+                for test in range(len(test_names)):
+                    for s_n in range(ss+1):
+                        like_circulation_given_s_n[p_c][test][s_n] = (circulation_sum_component[p_c][test][s_n]
+                                                                      / (circulation_sum_component[p_c][test][s_n]
+                                                                         + no_circulation_sum_component[p_c][test][s_n]))
+                        like_no_circulation_given_s_n[p_c][test][s_n] = 1 - like_circulation_given_s_n[p_c][test][s_n]
+
+            # Save the results in pickle files
             for p_c in range(len(p_circulation)):
                 # save the nested list containing the relevant probabilities for this scenario
                 with open("simOutputs_DTK/lik_circulation_numSamples%i_samplingDate%i_xLH%i.p" % (ss, all_sampling_dates[s1],

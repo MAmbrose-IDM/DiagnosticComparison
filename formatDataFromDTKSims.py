@@ -77,6 +77,22 @@ with open("simOutputs_DTK/pop_size_sim_all.p", "wb") as f:
 
 
 
+# The probability of getting a certain number of positive individuals in the population for each scenario was  obtained
+#    from a limited number of simulations. Although it likely approximates the true probability distribution, rarer
+#    events may not have been observed. As such, we could potentially fit a probability distribution to the observed
+#    results if we are willing to specify the form of this distribution.
+# for s1 in range(len(all_sampling_dates)):
+#     for s2 in range(len(all_LHs)):
+#         # load files describing the probability of each possible number of positive individuals for this scenario
+#         with open("simOutputs_DTK/prob_num_pos_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
+#                                                                                       round(all_LHs[s2] * 100)), "rb") as f:
+#             freq_pos_counts_circulation = pickle.load(f)
+#         with open("simOutputs_DTK/prob_num_pos_no_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
+#                                                                                          round(all_LHs[s2] * 100)), "rb") as f:
+#             freq_pos_counts_no_circulation = pickle.load(f)
+#
+# Hypothetically, we could add in fitting statements here...
+
 
 
 

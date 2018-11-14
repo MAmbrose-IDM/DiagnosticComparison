@@ -192,12 +192,16 @@ for s1 in range(len(all_sampling_dates)):
             for p_c in range(len(p_circulation)):
                 for test in range(len(test_names)):
                     for s_n in range(ss+1):
-                        like_circulation_given_s_n[p_c][test][s_n] = (circulation_sum_component[p_c][test][s_n]
-                                                                      / (circulation_sum_component[p_c][test][s_n]
-                                                                         + no_circulation_sum_component[p_c][test][s_n]))
-                        like_no_circulation_given_s_n[p_c][test][s_n] = 1 - like_circulation_given_s_n[p_c][test][s_n]
+                        denom_value = ((circulation_sum_component[p_c][test][s_n] + no_circulation_sum_component[p_c][test][s_n]))
+                        if denom_value > 0:
+                            like_circulation_given_s_n[p_c][test][s_n] = (circulation_sum_component[p_c][test][s_n]
+                                                                          / denom_value)
+                            like_no_circulation_given_s_n[p_c][test][s_n] = 1 - like_circulation_given_s_n[p_c][test][s_n]
+                        else:
+                            like_circulation_given_s_n[p_c][test][s_n] = -9
+                            like_no_circulation_given_s_n[p_c][test][s_n] = -9
 
-            # Save the results in pickle files
+                            # Save the results in pickle files
             for p_c in range(len(p_circulation)):
                 # save the nested list containing the relevant probabilities for this scenario
                 with open("simOutputs_DTK/lik_circulation_numSamples%i_samplingDate%i_xLH%i.p" % (ss, all_sampling_dates[s1],
@@ -210,6 +214,7 @@ for s1 in range(len(all_sampling_dates)):
 
 
 
-
+#TODO: figure out why some areas are returnin nan - for some values of s_n, all values of n_p have zero probability...
+#  is this the reason for the "<string>:79: RuntimeWarning: invalid value encountered in double_scalars" warning?
 
 

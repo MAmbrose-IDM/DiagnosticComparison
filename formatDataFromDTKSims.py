@@ -1,4 +1,3 @@
-# Load the Pandas libraries with alias 'pd'
 import pandas as pd
 import numpy as np
 import pickle
@@ -65,10 +64,11 @@ for s1 in range(len(all_sampling_dates)):
         # save the counts for this scenario as a pickle file
         with open("simOutputs_DTK/prob_num_pos_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
                                                                                       round(all_LHs[s2] * 100)), "wb") as f:
-            pickle.dump(freq_pos_counts_circulation, f)
+            pickle.dump(prob_num_pos_circulation, f)
+
         with open("simOutputs_DTK/prob_num_pos_no_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
                                                                                          round(all_LHs[s2] * 100)), "wb") as f:
-            pickle.dump(freq_pos_counts_no_circulation, f)
+            pickle.dump(prob_num_pos_no_circulation, f)
 
 # save the population sizes across all simulations
 with open("simOutputs_DTK/pop_size_sim_all.p", "wb") as f:

@@ -162,11 +162,20 @@ for s1 in range(len(all_sampling_dates)):
                             p1 = 1 - (reduce(mul, list(range((pop_size - n_p - ss + 1), (pop_size - n_p + 1))))
                                       / reduce(mul, list(range((pop_size - ss + 1), (pop_size + 1)))))
                         else:
-                            p1 = 1 - (reduce(mul, list(range((pop_size - n_p - s_n + 1), (pop_size - n_p + 1))))
-                                      * reduce(mul, list(range((n_p - (ss-s_n) + 1), (n_p + 1))))
-                                      * reduce(mul, list(range(((ss-s_n) + 1), (ss + 1))))
-                                      / reduce(mul, list(range(1, (s_n + 1))))
-                                      / reduce(mul, list(range((pop_size - ss + 1), (pop_size + 1)))))
+                            # p1 = 1 - (reduce(mul, list(range((pop_size - n_p - s_n + 1), (pop_size - n_p + 1))))
+                            #           * reduce(mul, list(range((n_p - (ss-s_n) + 1), (n_p + 1))))
+                            #           * reduce(mul, list(range(((ss-s_n) + 1), (ss + 1))))
+                            #           / reduce(mul, list(range(1, (s_n + 1))))
+                            #           / reduce(mul, list(range((pop_size - ss + 1), (pop_size + 1)))))
+
+                            # re-do, now using logs to avoid overflow errors
+                            # the log of the complement of p1
+                            p1_c_log = ( (sum([np.log(y) for y in range((pop_size - n_p - s_n + 1), (pop_size - n_p + 1))]))
+                                         + (sum([np.log(y) for y in range((n_p - (ss-s_n) + 1), (n_p + 1))]))
+                                         + (sum([np.log(y) for y in range(((ss-s_n) + 1), (ss + 1))]))
+                                         - (sum([np.log(y) for y in range(1, (s_n + 1))]))
+                                         - (sum([np.log(y) for y in range((pop_size - ss + 1), (pop_size + 1))])) )
+                            p1 = 1 - np.exp(p1_c_log)
 
                     for p_c in range(len(p_circulation)):
                         for test in range(len(test_names)):

@@ -28,10 +28,10 @@ def prob_dist_n_p_plotter(prob_num_pos, diagnostic_names, pop_size, ax=None, xma
         data_0 = [[y] * int(np.round(prob_num_pos[test][y] * 400)) for y in
                   range(len(prob_num_pos[test]))]
         data = [val for sublist in data_0 for val in sublist]
-        # if (np.max(data) - np.min(data)) > 0:
-        #     ax.hist(data, bins=(np.max(data) - np.min(data)), density=True, alpha=0.6, color=colormap[test])
-        # else:
-        #     ax.hist(data, bins=pop_size, density=True, alpha=0.6, color=colormap[test])
+        if (np.max(data) - np.min(data)) > 0:
+            ax.hist(data, bins=(np.max(data) - np.min(data)), density=True, alpha=0.6, color=colormap[test])
+        else:
+            ax.hist(data, bins=pop_size, density=True, alpha=0.6, color=colormap[test])
 
         ax.plot(prob_num_pos[test], '.', color=colormap[test], alpha=0.9, markersize=3,
                 label=diagnostic_names[test])  #  linewidth=1.0,
@@ -44,7 +44,7 @@ def prob_dist_n_p_plotter(prob_num_pos, diagnostic_names, pop_size, ax=None, xma
     else:
         ax.set_xlim(0, xmax)
 
-    ax.set_ylim(0, 1)
+    # ax.set_ylim(0, 1)
     ax.set_ylabel('probability density')
     ax.set_xlabel('number of individuals who \n would test positive if sampled')
     ax.spines['top'].set_visible(False)
@@ -89,9 +89,13 @@ def prob_positive_sample_plotter(prob_pos_sample, diagnostic_names, pop_size,
                 label=diagnostic_names[test])
         # draw vertical line where we exceed the detection_limit threshold
         if line_flag:
-            first_index = next(x[0] for x in enumerate(prob_pos_sample[test]) if x[1] >= detection_limit)
-            first_index_max = np.max([first_index_max, first_index])
-            ax.axvline(x=first_index, linestyle=':', color=colormap[test], alpha=0.7, linewidth=1)
+            # check whether any values are greater than detection limit
+            if np.max(prob_pos_sample[test]) >= detection_limit:
+                first_index = next(x[0] for x in enumerate(prob_pos_sample[test]) if x[1] >= detection_limit)
+                first_index_max = np.max([first_index_max, first_index])
+                ax.axvline(x=first_index, linestyle=':', color=colormap[test], alpha=0.7, linewidth=1)
+            else:
+                first_index_max = pop_size
 
     if line_flag:
         # draw horizontal line showing detection limit
@@ -123,7 +127,7 @@ def prob_positive_sample_plotter(prob_pos_sample, diagnostic_names, pop_size,
 
 def likelihood_given_observation_plotter(likelihood_given_s_n, diagnostic_names, ss,
                                          circulating_string='circulation is not',
-                                         detection_limit=0.95, ax=None):
+                                         detection_limit=0.95, line_flag=False, ax=None):
     """
     :param likelihood_given_s_n: nested list containing the likelihood there is (or is not) circulation given the
     observed number of negative samples (s_n) for a given diagnostic test
@@ -143,19 +147,26 @@ def likelihood_given_observation_plotter(likelihood_given_s_n, diagnostic_names,
     colormap = [colormap0[y] for y in color_order]
 
     # how far out into samples should we look? not much further than detection_limit, probably
-    first_index_max = 0
+    # first_index_max = 0
 
     for test in range(len(likelihood_given_s_n)):
-        ax.plot(likelihood_given_s_n[test], 'k', color=colormap[test], alpha=0.7, linewidth=3,
+        # replace -9 with None to prevent plotting
+        likelihood_given_s_n_cur = [None if i == -9 else i for i in likelihood_given_s_n[test]]
+        ax.plot(likelihood_given_s_n_cur, 'k', color=colormap[test], alpha=0.7, linewidth=3,
                 label=diagnostic_names[test])
 
-        # draw vertical line where we exceed the detection_limit threshold
-        first_index = next(x[0] for x in enumerate(likelihood_given_s_n[test]) if x[1] >= detection_limit)
-        first_index_max = np.max([first_index_max, first_index])
-        ax.axvline(x=first_index, linestyle=':', color=colormap[test], alpha=0.7, linewidth=1)
+        if line_flag:
+            # draw vertical line where we exceed the detection_limit threshold
+            if np.max(likelihood_given_s_n[test]) >= detection_limit:
+                first_index = next(x[0] for x in enumerate(likelihood_given_s_n[test]) if x[1] >= detection_limit)
+                # first_index_max = np.max([first_index_max, first_index])
+                ax.axvline(x=first_index, linestyle=':', color=colormap[test], alpha=0.7, linewidth=1)
+            # else:
+            #     first_index_max = pop_size
 
-    # draw horizontal line showing detection limit
-    ax.axhline(y=detection_limit, linestyle=':', color='k', alpha=0.7, linewidth=1)
+    if line_flag:
+        # draw horizontal line showing detection limit
+        ax.axhline(y=detection_limit, linestyle=':', color='k', alpha=0.7, linewidth=1)
 
     ax.set_ylim(0, 1)
     # ax.set_xlim(0, np.min([ss, (first_index_max+10)]))

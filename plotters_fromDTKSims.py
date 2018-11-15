@@ -22,12 +22,17 @@ def prob_dist_n_p_plotter(prob_num_pos, diagnostic_names, pop_size, ax=None, xma
     color_order = [5, 9, 8, 7, 6, 2, 1, 0, 4, 8, 3]
     colormap = [colormap0[y] for y in color_order]
 
+
     for test in range(len(prob_num_pos)):
         # create histogram instead of line plot
         data_0 = [[y] * int(np.round(prob_num_pos[test][y] * 400)) for y in
                   range(len(prob_num_pos[test]))]
         data = [val for sublist in data_0 for val in sublist]
-        ax.hist(data, bins=(np.max(data) - np.min(data)), density=True, alpha=0.6, color=colormap[test])
+        # if (np.max(data) - np.min(data)) > 0:
+        #     ax.hist(data, bins=(np.max(data) - np.min(data)), density=True, alpha=0.6, color=colormap[test])
+        # else:
+        #     ax.hist(data, bins=pop_size, density=True, alpha=0.6, color=colormap[test])
+
         ax.plot(prob_num_pos[test], '.', color=colormap[test], alpha=0.9, markersize=3,
                 label=diagnostic_names[test])  #  linewidth=1.0,
 
@@ -39,6 +44,7 @@ def prob_dist_n_p_plotter(prob_num_pos, diagnostic_names, pop_size, ax=None, xma
     else:
         ax.set_xlim(0, xmax)
 
+    ax.set_ylim(0, 1)
     ax.set_ylabel('probability density')
     ax.set_xlabel('number of individuals who \n would test positive if sampled')
     ax.spines['top'].set_visible(False)

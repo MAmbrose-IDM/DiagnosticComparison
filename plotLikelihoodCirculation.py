@@ -49,7 +49,20 @@ calculate_likelihood_no_circulation_each_sim(sim_output_list=sim_output_list, po
                                           number_tested=number_tested, false_pos_prob=false_pos_prob,
                                           prob_circulation=prob_circulation)
 
+
+
+
+
+
 # TODO: haven't started converting the next section into likelihood of circulation figure panel - actually, I don't think I want to plot num_samples_needed
+# At this point, I think I'm going to migrate over to working on DTK output primarily, so I'm not sure this section will be touched for a while (if ever...)
+
+
+
+
+
+
+
 # Create multi-panel plot
 # - Each columns of the new plot panel should correspond to a different assumption about seasonality of cases given
 # # circulation is occurring.

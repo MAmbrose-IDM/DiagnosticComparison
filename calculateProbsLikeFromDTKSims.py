@@ -42,10 +42,10 @@ for s1 in range(len(all_sampling_dates)):
         # load files describing the probability of each possible number of positive individuals for this scenario
         with open("simOutputs_DTK/prob_num_pos_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
                                                                                       round(all_LHs[s2] * 100)), "rb") as f:
-            freq_pos_counts_circulation = pickle.load(f)
+            prob_num_pos_circulation = pickle.load(f)
         with open("simOutputs_DTK/prob_num_pos_no_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
                                                                                          round(all_LHs[s2] * 100)), "rb") as f:
-            freq_pos_counts_no_circulation = pickle.load(f)
+            prob_num_pos_no_circulation = pickle.load(f)
 
         # create lists to store the probabilities for all values of S and all tests
         prob_pos_sample_given_circulation = [([0] * (pop_size+1)) for y in range(len(test_names))]
@@ -81,9 +81,9 @@ for s1 in range(len(all_sampling_dates)):
                     p1 = 1 - 0
                 # iterate through tests, each of which will have a different value for p2
                 for test in range(len(test_names)):
-                    p2 = freq_pos_counts_circulation[test][n_p]
+                    p2 = prob_num_pos_circulation[test][n_p]
                     prob_at_least_one_positive_circulation[test] += p1*p2
-                    p2_no_circulation = freq_pos_counts_no_circulation[test][n_p]
+                    p2_no_circulation = prob_num_pos_no_circulation[test][n_p]
                     prob_at_least_one_positive_no_circulation[test] += p1*p2_no_circulation
 
             # store the results for this value of ss
@@ -113,10 +113,10 @@ for s1 in range(len(all_sampling_dates)):
         # load files describing the probability of each possible number of positive individuals for this scenario
         with open("simOutputs_DTK/prob_num_pos_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
                                                                                       round(all_LHs[s2] * 100)), "rb") as f:
-            freq_pos_counts_circulation = pickle.load(f)
+            prob_num_pos_circulation = pickle.load(f)
         with open("simOutputs_DTK/prob_num_pos_no_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
                                                                                          round(all_LHs[s2] * 100)), "rb") as f:
-            freq_pos_counts_no_circulation = pickle.load(f)
+            prob_num_pos_no_circulation = pickle.load(f)
 
         # iterate over values of S (from the ss_values list)
         for ss_index, ss in enumerate(ss_values):
@@ -132,7 +132,7 @@ for s1 in range(len(all_sampling_dates)):
             no_circulation_sum_component = [[([0] * (ss + 1)) for y in range(len(test_names))] for z in range(len(p_circulation))]
 
             # iterate over possible values of s_n (must be less than or equal to ss
-            for s_n in range(ss+1):
+            for s_n in range(ss + 1):
                 # Calculate L(no circulation | S_n==s_n) ...and repeat for each value of p_circulation and for each test:
                 #  = P(S_n==s_n | no circulation) * P(no circulation) / (P(S_n==s_n | no circulation) * P(no circulation)
                 #                                                        + P(S_n==s_n | circulation) * P(circulation))
@@ -159,13 +159,19 @@ for s1 in range(len(all_sampling_dates)):
                         #       ( (1)*...*(s_n) ) / ( (N-ss+1)*...*(N) )
                         # note that range(x) goes up to (x-1), so we add one to the upper values
                         if s_n == 0:
-                            p1 = 1 - (reduce(mul, list(range((n_p - ss + 1), (n_p + 1))))
-                                      / reduce(mul, list(range((pop_size - ss + 1), (pop_size + 1)))))
+                            # p1 = (reduce(mul, list(range((n_p - ss + 1), (n_p + 1))))
+                            #           / reduce(mul, list(range((pop_size - ss + 1), (pop_size + 1)))))
+                            p1_c_log = ( (sum([np.log(y) for y in range((n_p - (ss-s_n) + 1), (n_p + 1))]))
+                                         - (sum([np.log(y) for y in range((pop_size - ss + 1), (pop_size + 1))])) )
+                            p1 = np.exp(p1_c_log)
                         elif s_n == ss:
-                            p1 = 1 - (reduce(mul, list(range((pop_size - n_p - ss + 1), (pop_size - n_p + 1))))
-                                      / reduce(mul, list(range((pop_size - ss + 1), (pop_size + 1)))))
+                            # p1 = (reduce(mul, list(range((pop_size - n_p - ss + 1), (pop_size - n_p + 1))))
+                            #           / reduce(mul, list(range((pop_size - ss + 1), (pop_size + 1)))))
+                            p1_c_log = ( (sum([np.log(y) for y in range((pop_size - n_p - s_n + 1), (pop_size - n_p + 1))]))
+                                         - (sum([np.log(y) for y in range((pop_size - ss + 1), (pop_size + 1))])) )
+                            p1 = np.exp(p1_c_log)
                         else:
-                            # p1 = 1 - (reduce(mul, list(range((pop_size - n_p - s_n + 1), (pop_size - n_p + 1))))
+                            # p1 = (reduce(mul, list(range((pop_size - n_p - s_n + 1), (pop_size - n_p + 1))))
                             #           * reduce(mul, list(range((n_p - (ss-s_n) + 1), (n_p + 1))))
                             #           * reduce(mul, list(range(((ss-s_n) + 1), (ss + 1))))
                             #           / reduce(mul, list(range(1, (s_n + 1))))
@@ -178,12 +184,12 @@ for s1 in range(len(all_sampling_dates)):
                                          + (sum([np.log(y) for y in range(((ss-s_n) + 1), (ss + 1))]))
                                          - (sum([np.log(y) for y in range(1, (s_n + 1))]))
                                          - (sum([np.log(y) for y in range((pop_size - ss + 1), (pop_size + 1))])) )
-                            p1 = 1 - np.exp(p1_c_log)
+                            p1 = np.exp(p1_c_log)
 
                     for p_c in range(len(p_circulation)):
                         for test in range(len(test_names)):
-                            p2_circulation = freq_pos_counts_circulation[test][n_p]
-                            p2_no_circulation = freq_pos_counts_no_circulation[test][n_p]
+                            p2_circulation = prob_num_pos_circulation[test][n_p]
+                            p2_no_circulation = prob_num_pos_no_circulation[test][n_p]
                             prob_circulation = p_circulation[p_c]
                             circulation_sum_component[p_c][test][s_n] += (p1 * p2_circulation * prob_circulation)
                             no_circulation_sum_component[p_c][test][s_n] += (p1 * p2_no_circulation * (1-prob_circulation))
@@ -204,17 +210,14 @@ for s1 in range(len(all_sampling_dates)):
                             # Save the results in pickle files
             for p_c in range(len(p_circulation)):
                 # save the nested list containing the relevant probabilities for this scenario
-                with open("simOutputs_DTK/lik_circulation_numSamples%i_samplingDate%i_xLH%i.p" % (ss, all_sampling_dates[s1],
+                with open("simOutputs_DTK/lik_circulation_numSamples%i_PCirculation%i_samplingDate%i_xLH%i.p" % (ss, round(p_circulation[p_c] * 100), all_sampling_dates[s1],
                                                                                                   round(all_LHs[s2] * 100)), "wb") as f:
                     pickle.dump(like_circulation_given_s_n[p_c], f)
 
-                with open("simOutputs_DTK/lik_no_circulation_numSamples%i_samplingDate%i_xLH%i.p" % (ss, all_sampling_dates[s1],
+                with open("simOutputs_DTK/lik_no_circulation_numSamples%i_PCirculation%i_samplingDate%i_xLH%i.p" % (ss, round(p_circulation[p_c] * 100), all_sampling_dates[s1],
                                                                                                      round(all_LHs[s2] * 100)), "wb") as f:
                     pickle.dump(like_no_circulation_given_s_n[p_c], f)
 
 
-
-#TODO: figure out why some areas are returnin nan - for some values of s_n, all values of n_p have zero probability...
-#  is this the reason for the "<string>:79: RuntimeWarning: invalid value encountered in double_scalars" warning?
 
 

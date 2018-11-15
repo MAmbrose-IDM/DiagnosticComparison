@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 import pickle
+
+from scipy.stats import norm, binom
+
 # import os
 # os.chdir('C:\\Users\\mambrose\\OneDrive - IDMOD\\MalariaDiagnostics\\Serology')
 
@@ -77,23 +80,78 @@ with open("simOutputs_DTK/pop_size_sim_all.p", "wb") as f:
 
 
 
-# The probability of getting a certain number of positive individuals in the population for each scenario was  obtained
+# The probability of getting a certain number of positive individuals in the population for each scenario was obtained
 #    from a limited number of simulations. Although it likely approximates the true probability distribution, rarer
 #    events may not have been observed. As such, we could potentially fit a probability distribution to the observed
-#    results if we are willing to specify the form of this distribution.
+#    results if we are willing to specify the form of this distribution. For instance, below we describe the
+#    probabilities using a binomial distribution
+# # load the population sizes across all simulations and take average
+# with open("simOutputs_DTK/pop_size_sim_all.p", "rb") as f:
+#     pop_size_sim = pickle.load(f)
+# pop_size = int(round(np.mean(pop_size_sim)))
+#
 # for s1 in range(len(all_sampling_dates)):
 #     for s2 in range(len(all_LHs)):
-#         # load files describing the probability of each possible number of positive individuals for this scenario
+#         # Given circulation
+#         # load file describing the probability of each possible number of positive individuals for this scenario
 #         with open("simOutputs_DTK/prob_num_pos_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
 #                                                                                       round(all_LHs[s2] * 100)), "rb") as f:
-#             freq_pos_counts_circulation = pickle.load(f)
+#             prob_num_pos_circulation = pickle.load(f)
+#
+#         # fit a binomial distribution to these values
+#         data_0_circulation = [[y] * int(np.round(prob_num_pos_circulation[0][y] * 1000)) for y in
+#                   range(len(prob_num_pos_circulation[0]))]
+#         data_circulation = [val for sublist in data_0_circulation for val in sublist]
+#
+#         # Fit a binomial distribution to the data:
+#         n_b, p_b = pop_size, np.mean(data_circulation) / pop_size
+#
+#         # Given no circulation
+#         # load file describing the probability of each possible number of positive individuals for this scenario
 #         with open("simOutputs_DTK/prob_num_pos_no_circulation_samplingDate%i_xLH%i.p" % (all_sampling_dates[s1],
 #                                                                                          round(all_LHs[s2] * 100)), "rb") as f:
-#             freq_pos_counts_no_circulation = pickle.load(f)
+#             prob_num_pos_no_circulation = pickle.load(f)
 #
-# Hypothetically, we could add in fitting statements here...
+#         # fit a normal distribution to these values
+#         data_0_no_circulation = [[y] * int(np.round(prob_num_pos_circulation[0][y] * 1000)) for y in
+#                   range(len(prob_num_pos_circulation[0]))]
+#         data_no_circulation = [val for sublist in data_0_no_circulation for val in sublist]
+#
+#         # Fit a binomial distribution to the data:
+#         n_b, p_b = pop_size, np.mean(data_no_circulation) / pop_size
+#
+# # could then calculate and save probabilities for different values of s_n
+#
 
-
+# # some plots to explore how well this would work...
+# import numpy as np
+# from scipy.stats import norm
+# import matplotlib.pyplot as plt
+#
+#
+# data_0 = [[y]*int(np.round(prob_num_pos_no_circulation[0][y]*1000)) for y in range(len(prob_num_pos_no_circulation[0]))]
+# data = [val for sublist in data_0 for val in sublist]
+#
+# # Fit a normal distribution to the data:
+# mu, std = norm.fit(data)
+# n_b, p_b = 271, np.mean(data)/271
+#
+# # Plot the histogram.
+# plt.hist(data, bins=3, density=True, alpha=0.6, color='g')
+#
+# # Plot the PDF.
+# xmin, xmax = plt.xlim()
+# x = np.linspace(xmin, xmax, 100)
+# p_norm = norm.pdf(x, mu, std)
+# p_binom = binom.pmf(x, n_b, p_b)
+# plt.plot(x, p_norm, 'k', linewidth=2)
+# # plt.plot(x, p_binom, 'k', linewidth=2, color='red')
+# x_binom = range(int(np.round(xmin)), int(np.round(xmax)))
+# plt.plot(x_binom, binom.pmf(x_binom, n_b, p_b), 'bo', ms=8, label='binom pmf')
+# title = "Fit results: mu = %.2f,  std = %.2f" % (mu, std)
+# plt.title(title)
+#
+# plt.show()
 
 
 

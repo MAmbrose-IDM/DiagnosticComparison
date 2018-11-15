@@ -18,8 +18,6 @@ from calculateNumSamplesNeeded import prob_detected_without_replacement
 def samples_needed_each_test_plotter(x_values, values_for_plot, pop_size, diagnostic_names, confidence_level,
                                      num_case_in_year_list, ax=None):
     """
-    Currently only plots the first three diagnostic tests sent (will need to add more colors if want additional
-        ones plotted in the future)
     :param x_values: x-coordinates for lines that are to be plotted
     :param values_for_plot: points to corresponding to the y-coordinates of lines. Object is a list of lists of lists.
         The outer list contains plotting information for each of the diagnostic tests. The middle level contains three

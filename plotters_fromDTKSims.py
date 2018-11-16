@@ -93,13 +93,13 @@ def prob_positive_sample_plotter(prob_pos_sample, diagnostic_names, pop_size,
             if np.max(prob_pos_sample[test]) >= detection_limit:
                 first_index = next(x[0] for x in enumerate(prob_pos_sample[test]) if x[1] >= detection_limit)
                 first_index_max = np.max([first_index_max, first_index])
-                ax.axvline(x=first_index, linestyle=':', color=colormap[test], alpha=0.7, linewidth=1)
+                ax.axvline(x=first_index, linestyle=':', color=colormap[test], alpha=0.7, linewidth=2)
             else:
                 first_index_max = pop_size
 
     if line_flag:
         # draw horizontal line showing detection limit
-        ax.axhline(y=detection_limit, linestyle=':', color='k', alpha=0.7, linewidth=1)
+        ax.axhline(y=detection_limit, linestyle=':', color='k', alpha=0.7, linewidth=2)
 
     if xmax is None:
         ax.set_xlim(0, np.min([pop_size, (first_index_max+10)]))
@@ -202,6 +202,38 @@ def likelihood_given_observation_plotter(likelihood_given_s_n, diagnostic_names,
 
 
 
+
+def prevalence_plotter(prev_list, sampling_date=None, ax=None, ymax=None, color='k'):
+    """
+    :param prob_num_pos: nested list containing the probability that a population where disease is
+        circulating contains n_p individuals who would test positive on each diagnostic test (given circulation or
+        given no circulation).
+        prob_num_pos[test][n_p]
+    :param diagnostic_names: list of character strings naming the diagnostic tests plotted
+    :param pop_size: assumed number of individuals in the population
+    :param ax: axes to use for the current plot
+    :param xmax: xlim max to plot if specified
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    ax.plot(range(len(prev_list[0])), prev_list[0], 'k', color=color, linewidth=3.0)
+    ax.fill_between(range(len(prev_list[0])), prev_list[2], prev_list[1], alpha=0.25, facecolor=color)
+
+    if ymax is None:
+        ax.set_ylim(0, 1)
+    else:
+        ax.set_ylim(0, ymax)
+
+    if sampling_date is not None:
+        ax.axvline(x=sampling_date, linestyle=':', color='b', linewidth=2)
+
+    ax.set_ylabel('prevalence')
+    ax.set_xlabel('day of year')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    # ax.set_title('Population size = %i; Confidence level = %.2f' % (pop_size, round(confidence_level, 2)), y=1.08)
+    # plt.legend(title='Diagnostic method')
 
 
 

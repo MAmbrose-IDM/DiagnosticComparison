@@ -4,7 +4,6 @@ import pickle
 
 from scipy.stats import norm, binom
 
-
 def formatDataFromDTKSims(simResults_filename, false_pos_rates, test_col_names, test_pos_names, max_pop_size,
                           filename_suffix):
     """
@@ -58,7 +57,13 @@ def formatDataFromDTKSims(simResults_filename, false_pos_rates, test_col_names, 
                     for test in range(len(test_col_names)):
                         # count the number of positive results for each test within this simulated dataset
                         num_pos_cur = cur_dataframe.loc[:, test_col_names[test]] == test_pos_names[test]
-                        freq_pos_counts_circulation[test][sum(num_pos_cur)] += 1
+
+                        # add in false positives among those with a negative test
+                        num_neg_cur = pop_size_sim[index] - num_pos_cur
+                        num_false_pos = np.random.binomial(n=num_neg_cur, p=false_pos_rates[test])
+
+                        # total number of positive individuals = true positives plus false positives
+                        freq_pos_counts_circulation[test][sum(num_pos_cur)+num_false_pos] += 1
 
                         # false positives if no circulation
                         num_false_pos_cur = np.random.binomial(n=pop_size_sim[index], p=false_pos_rates[test])
@@ -87,6 +92,47 @@ def formatDataFromDTKSims(simResults_filename, false_pos_rates, test_col_names, 
 
     # return sampling dates and LH values
     return [all_sampling_dates, all_LHs]
+
+
+def formatPrevDataFromDTKSims(prev_filename, filename_suffix):
+    """
+    Read in output from many DTK simulations, all stored in a csv file. The input file must have a column for the
+        malaria prevalence at each day.
+        Save a .p pickle file for each larval habitat scenario containing three lists.
+        The first list contains the mean prevalence for each day, the second list contains the 95%CI max
+        (97.5th percentile), and the third list contains the 95%CI min (the 2.5th percentile).
+    :param prev_filename: path and name of file where DTK output was stored
+    :param filename_suffix: string to add to end of newly created files to identify simulation batch
+    """
+    allSimResults = pd.read_csv(prev_filename)
+
+    # four different larval habitat multipliers (proxy for intensity) - there are
+    #  four different values for each, giving a total of 16 scenarios to explore
+    all_LHs = allSimResults.x_Temporary_Larval_Habitat.unique()
+    all_node_ids = allSimResults.node.unique()
+    all_sim_nums = allSimResults.Run_Number.unique()
+
+
+    for lh in range(len(all_LHs)):
+        # store a list of the prevalences recorded on each day for this scenario
+        #   outer list is day, inner list is the prevalences recorded on that day across all simulations
+        # prev_list = [([None] * (len(all_node_ids) * len(all_sim_nums))) for y in np.max(allSimResults['time'])]
+        prev_list = [[None] * (np.max(allSimResults['time']) + 1) for y in range(3)]
+
+        for dd in range(np.max(allSimResults['time'])+1):
+            lh_rows = allSimResults['x_Temporary_Larval_Habitat'] == all_LHs[lh]
+            dd_rows = allSimResults['time'] == dd
+            new_df = allSimResults[lh_rows & dd_rows]
+            prev_values = list(new_df.Prevalence)
+            prev_list[0][dd] = np.median(prev_values)
+            prev_list[1][dd] = np.quantile(prev_values, q=0.975)
+            prev_list[2][dd] = np.quantile(prev_values, q=0.025)
+
+            # save the mean and 95CI values for this scenario as a pickle file
+            with open("simOutputs_DTK/prevalenceData_xLH%i_%s.p" % (round(all_LHs[lh] * 100),
+                                                                    filename_suffix), "wb") as f:
+                pickle.dump(prev_list, f)
+
 
 
 

@@ -59,11 +59,11 @@ def formatDataFromDTKSims(simResults_filename, false_pos_rates, test_col_names, 
                         num_pos_cur = cur_dataframe.loc[:, test_col_names[test]] == test_pos_names[test]
 
                         # add in false positives among those with a negative test
-                        num_neg_cur = pop_size_sim[index] - num_pos_cur
+                        num_neg_cur = pop_size_sim[index] - sum(num_pos_cur)
                         num_false_pos = np.random.binomial(n=num_neg_cur, p=false_pos_rates[test])
 
                         # total number of positive individuals = true positives plus false positives
-                        freq_pos_counts_circulation[test][sum(num_pos_cur)+num_false_pos] += 1
+                        freq_pos_counts_circulation[test][np.sum(num_pos_cur) + num_false_pos] += 1
 
                         # false positives if no circulation
                         num_false_pos_cur = np.random.binomial(n=pop_size_sim[index], p=false_pos_rates[test])

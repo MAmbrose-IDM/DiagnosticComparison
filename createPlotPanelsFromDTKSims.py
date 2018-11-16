@@ -141,7 +141,7 @@ def plot_panel_prob_positive_sample_circulation(pop_size, test_names, filename_s
             ax_cur = fig.add_subplot(grid[s2+1, s1+1])
             prob_positive_sample_plotter(prob_pos_sample=prob_pos_sample_given_circulation, diagnostic_names=test_names, pop_size=pop_size,
                                          circulating_string='circulation is',
-                                         detection_limit=0.95, ax=ax_cur, line_flag=True, xmax=pop_size)
+                                         detection_limit=0.95, ax=ax_cur, line_flag=True, xmax=100)
 
     # row and column labels
     for s1 in range(len(all_sampling_dates)):
@@ -196,7 +196,7 @@ def plot_panel_prob_positive_sample_no_circulation(pop_size, test_names, filenam
     prob_positive_sample_plotter(prob_pos_sample=prob_pos_sample_given_no_circulation, diagnostic_names=test_names,
                                  pop_size=pop_size,
                                  circulating_string='circulation is not',
-                                 detection_limit=0.95, ax=ax_cur, line_flag=False, xmax=pop_size)
+                                 detection_limit=0.95, ax=ax_cur, line_flag=False, xmax=100)
 
     fig.suptitle('Probability of at least one positive sample \n  given circulation is not occurring')
 
@@ -465,7 +465,7 @@ def plot_panel_likelihood_no_circulation(pop_size, test_names, filename_suffix, 
 #
 # Plot the prevalence through the year
 #
-def plot_panel_prevalence(filename_suffix, all_sampling_dates, all_LHs):
+def plot_panel_prevalence(filename_suffix, all_sampling_dates, all_LHs, sampling_date_names, ave_prevs):
     """
 
     :param filename_suffix: indicates which DTK simulation set to use
@@ -499,15 +499,19 @@ def plot_panel_prevalence(filename_suffix, all_sampling_dates, all_LHs):
         ax.axis('off')
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
-        ax.text(0.5, 0.5, 'sampling day: %i' % all_sampling_dates[s1], horizontalalignment='center',
+        ax.text(0.5, 0.5, 'sampling day: %s' % sampling_date_names[s1], horizontalalignment='center',
                 verticalalignment='center', fontweight='bold')
+        # ax.text(0.5, 0.5, 'sampling date: %i' % all_sampling_dates[s1], horizontalalignment='center',
+        #         verticalalignment='center', fontweight='bold')
     for s2 in range(len(all_LHs)):
         ax = fig.add_subplot(grid[s2+1, 0])
         ax.axis('off')
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
-        ax.text(0, 0.5, 'LH multiplier: %.1f' % all_LHs[s2], horizontalalignment='center',
+        ax.text(0, 0.5, 'mean prevalence: \n %.1f%%' % (ave_prevs[s2]*100), horizontalalignment='center',
                 verticalalignment='center', rotation=90, fontweight='bold')
+        # ax.text(0, 0.5, 'LH multiplier: %.1f' % all_LHs[s2], horizontalalignment='center',
+        #         verticalalignment='center', rotation=90, fontweight='bold')
 
     fig.suptitle('Prevalence through time')
 
@@ -523,7 +527,8 @@ def plot_panel_prevalence(filename_suffix, all_sampling_dates, all_LHs):
 #
 # Plot the prevalence through the year
 #
-def plot_panel_prevalence_with_without_HS(filename_suffix1, filename_suffix2, all_sampling_dates, all_LHs):
+def plot_panel_prevalence_with_without_HS(filename_suffix1, filename_suffix2, all_sampling_dates, all_LHs,
+                                          sampling_date_names, ave_prevs):
     """
 
     :param filename_suffix: indicates which DTK simulation set to use
@@ -564,15 +569,19 @@ def plot_panel_prevalence_with_without_HS(filename_suffix1, filename_suffix2, al
         ax.axis('off')
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
-        ax.text(0.5, 0.5, 'sampling day: %i' % all_sampling_dates[s1], horizontalalignment='center',
+        ax.text(0.5, 0.5, 'sampling day: %s' % sampling_date_names[s1], horizontalalignment='center',
                 verticalalignment='center', fontweight='bold')
+        # ax.text(0.5, 0.5, 'sampling date: %i' % all_sampling_dates[s1], horizontalalignment='center',
+        #         verticalalignment='center', fontweight='bold')
     for s2 in range(len(all_LHs)):
         ax = fig.add_subplot(grid[s2+1, 0])
         ax.axis('off')
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
-        ax.text(0, 0.5, 'LH multiplier: %.1f' % all_LHs[s2], horizontalalignment='center',
+        ax.text(0, 0.5, 'mean prevalence: \n %.1f%%' % (ave_prevs[s2]*100), horizontalalignment='center',
                 verticalalignment='center', rotation=90, fontweight='bold')
+        # ax.text(0, 0.5, 'LH multiplier: %.1f' % all_LHs[s2], horizontalalignment='center',
+        #         verticalalignment='center', rotation=90, fontweight='bold')
 
     fig.suptitle('Prevalence through time')
 

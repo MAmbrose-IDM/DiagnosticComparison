@@ -127,7 +127,7 @@ def prob_positive_sample_plotter(prob_pos_sample, diagnostic_names, pop_size,
 
 def likelihood_given_observation_plotter(likelihood_given_s_n, diagnostic_names, ss,
                                          circulating_string='circulation is not',
-                                         detection_limit=0.95, line_flag=False, xmax = 20, ax=None):
+                                         detection_limit=0.95, line_flag=False, xmax = 50, ax=None):
     """
     :param likelihood_given_s_n: nested list containing the likelihood there is (or is not) circulation given the
     observed number of negative samples (s_n) for a given diagnostic test

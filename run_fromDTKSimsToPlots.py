@@ -14,12 +14,13 @@ from createPlotPanelsFromDTKSims import plot_panel_prob_num_pos_circulation, plo
 #
 os.chdir('C:\\Users\\mambrose\\OneDrive - IDMOD\\MalariaDiagnostics\\Serology')
 
-simResults_filename = 'C:/Users/mambrose/Dropbox (IDM)/Malaria Team Folder/projects/serological_diagnostic/simulation_data/v3_withHS_all_data.csv'
-prev_filename = 'C:/Users/mambrose/Dropbox (IDM)/Malaria Team Folder/projects/serological_diagnostic/simulation_data/v3_withHS_prevalence_data.csv'
-filename_suffix = 'v3_withHS'
 # simResults_filename = 'C:/Users/mambrose/Dropbox (IDM)/Malaria Team Folder/projects/serological_diagnostic/simulation_data/v3_noHS_all_data.csv'
 # prev_filename = 'C:/Users/mambrose/Dropbox (IDM)/Malaria Team Folder/projects/serological_diagnostic/simulation_data/v3_noHS_prevalence_data.csv'
 # filename_suffix = 'v3'
+simResults_filename = 'C:/Users/mambrose/Dropbox (IDM)/Malaria Team Folder/projects/serological_diagnostic/simulation_data/v3_withHS_all_data.csv'
+prev_filename = 'C:/Users/mambrose/Dropbox (IDM)/Malaria Team Folder/projects/serological_diagnostic/simulation_data/v3_withHS_prevalence_data.csv'
+filename_suffix = 'v3_withHS'
+
 
 # plot with and without HS?
 plot_with_without_hs = True
@@ -104,11 +105,13 @@ if need_to_generate_plots == True:
     #
     # Prevalence of infection through the year
     #
-    plot_panel_prevalence(filename_suffix=filename_suffix, all_sampling_dates=all_sampling_dates, all_LHs=all_LHs)
+    plot_panel_prevalence(filename_suffix=filename_suffix, all_sampling_dates=all_sampling_dates, all_LHs=all_LHs,
+                                        sampling_date_names=sampling_date_names, ave_prevs=ave_prevs)
 
     if plot_with_without_hs:
         plot_panel_prevalence_with_without_HS(filename_suffix1=filename_suffix1, filename_suffix2=filename_suffix2,
-                                              all_sampling_dates=all_sampling_dates, all_LHs=all_LHs)
+                                              all_sampling_dates=all_sampling_dates, all_LHs=all_LHs,
+                                              sampling_date_names=sampling_date_names, ave_prevs=ave_prevs)
 
 
     #

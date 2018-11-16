@@ -12,8 +12,11 @@ from createPlotPanelsFromDTKSims import plot_panel_prob_num_pos_circulation, plo
 # Parameters
 #
 os.chdir('C:\\Users\\mambrose\\OneDrive - IDMOD\\MalariaDiagnostics\\Serology')
-simResults_filename = 'C:/Users/mambrose/Dropbox (IDM)/Malaria Team Folder/projects/serological_diagnostic/simulation_data/v3_noHS_all_data.csv'
-filename_suffix = 'v3'
+
+simResults_filename = 'C:/Users/mambrose/Dropbox (IDM)/Malaria Team Folder/projects/serological_diagnostic/simulation_data/v3_withHS_all_data.csv'
+filename_suffix = 'v3_withHS'
+# simResults_filename = 'C:/Users/mambrose/Dropbox (IDM)/Malaria Team Folder/projects/serological_diagnostic/simulation_data/v3_noHS_all_data.csv'
+# filename_suffix = 'v3'
 
 need_to_generate_pickle_files = False
 need_to_generate_plots = True
@@ -63,6 +66,8 @@ if need_to_generate_pickle_files == True:
 else:
     all_sampling_dates = [45, 190, 300, 360]
     all_LHs = [0.6, 0.7, 0.8, 1.0]
+
+sampling_date_names = ['Feb. 14', 'Jul. 9', 'Oct. 27', 'Dec. 26']
 
 # Plots
 if need_to_generate_plots == True:

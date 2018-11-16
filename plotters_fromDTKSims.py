@@ -127,7 +127,7 @@ def prob_positive_sample_plotter(prob_pos_sample, diagnostic_names, pop_size,
 
 def likelihood_given_observation_plotter(likelihood_given_s_n, diagnostic_names, ss,
                                          circulating_string='circulation is not',
-                                         detection_limit=0.95, line_flag=False, ax=None):
+                                         detection_limit=0.95, line_flag=False, xmax = 20, ax=None):
     """
     :param likelihood_given_s_n: nested list containing the likelihood there is (or is not) circulation given the
     observed number of negative samples (s_n) for a given diagnostic test
@@ -152,7 +152,9 @@ def likelihood_given_observation_plotter(likelihood_given_s_n, diagnostic_names,
     for test in range(len(likelihood_given_s_n)):
         # replace -9 with None to prevent plotting
         likelihood_given_s_n_cur = [None if i == -9 else i for i in likelihood_given_s_n[test]]
-        ax.plot(likelihood_given_s_n_cur, 'k', color=colormap[test], alpha=0.7, linewidth=3,
+        # plot number of POSITIVE samples on x-axis instead of number of NEGATIVE samples
+        x_num_positive = [ss - y for y in list(range(len(likelihood_given_s_n_cur)))]
+        ax.plot(x_num_positive, likelihood_given_s_n_cur, 'k', color=colormap[test], alpha=0.7, linewidth=3,
                 label=diagnostic_names[test])
 
         if line_flag:
@@ -169,9 +171,9 @@ def likelihood_given_observation_plotter(likelihood_given_s_n, diagnostic_names,
         ax.axhline(y=detection_limit, linestyle=':', color='k', alpha=0.7, linewidth=1)
 
     ax.set_ylim(0, 1)
-    # ax.set_xlim(0, np.min([ss, (first_index_max+10)]))
+    ax.set_xlim(0, xmax)
     ax.set_ylabel('likelihood %s \n occurring' % circulating_string)
-    ax.set_xlabel('number of negative tests \n (out of %i)' % ss)
+    ax.set_xlabel('number of positive tests \n (out of %i)' % ss)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     # ax.set_title('Population size = %i; Confidence level = %.2f' % (pop_size, round(confidence_level, 2)), y=1.08)

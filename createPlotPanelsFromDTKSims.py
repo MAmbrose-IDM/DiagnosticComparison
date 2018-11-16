@@ -43,7 +43,7 @@ def plot_panel_prob_num_pos_circulation(pop_size, test_names, filename_suffix, a
 
             ax_cur = fig.add_subplot(grid[s2+1, s1+1])
             prob_dist_n_p_plotter(prob_num_pos=prob_num_pos_circulation,
-                                  diagnostic_names=test_names, pop_size=pop_size, ax=ax_cur)
+                                  diagnostic_names=test_names, pop_size=pop_size, xmax=pop_size, ax=ax_cur)
 
     # row and column labels
     for s1 in range(len(all_sampling_dates)):
@@ -134,7 +134,7 @@ def plot_panel_prob_positive_sample_circulation(pop_size, test_names, filename_s
             ax_cur = fig.add_subplot(grid[s2+1, s1+1])
             prob_positive_sample_plotter(prob_pos_sample=prob_pos_sample_given_circulation, diagnostic_names=test_names, pop_size=pop_size,
                                          circulating_string='circulation is',
-                                         detection_limit=0.95, ax=ax_cur, line_flag=True)
+                                         detection_limit=0.95, ax=ax_cur, line_flag=True, xmax=pop_size)
 
     # row and column labels
     for s1 in range(len(all_sampling_dates)):
@@ -255,7 +255,7 @@ def plot_panel_likelihood_circulation(pop_size, test_names, filename_suffix, all
 
             fig.suptitle('Likelihood of circulation, S = %i, P(circulation)=%.2f' % (ss, p_circulation[p_c]))
 
-            plt.show()
+            # plt.show()
 
             fig.savefig('figures/Likelihood_circulation_S%i_PCirculation%i_DTK_%s.pdf' % (ss, int(round(p_circulation[p_c]*100)), filename_suffix))
 
